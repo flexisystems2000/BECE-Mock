@@ -180,7 +180,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Verified Live Firebase Configuration Setup
+        // Live Firebase Configuration Setup Aligned with your API panel
         const firebaseConfig = {
             apiKey: "AIzaSyAetpMyU7cX-cy5AiE5tYU3QkDeehmBvjk",
             authDomain: "bece-mock.firebaseapp.com",
@@ -210,7 +210,7 @@
             { key: "home-economics", file: "home-economics.json" },
             { key: "mathematics", file: "mathematics.json" },
             { key: "security-education", file: "security-education.json" },
-            { key: "social-studies", file: "social studies.json" }, 
+            { key: "social-studies", file: "social studies.json" }, // Safely routes the natural file space
             { key: "yoruba", file: "yoruba.json" }
         ];
 
@@ -253,7 +253,6 @@
             const rightNow = new Date();
             const currentHours = rightNow.getHours();
             
-            // Checks for opening block constraint limits (09:00 AM)
             if (currentHours < 9) {
                 errNode.innerText = "Access Forbidden! The examination session workspace opens strictly at 09:00AM.";
                 errNode.classList.remove("hidden");
@@ -358,162 +357,4 @@
                 
                 button.innerHTML = `
                     <div class="flex items-center space-x-3">
-                        <span class="w-6 h-6 rounded-full flex items-center justify-center border text-xs font-bold ${isSelected ? 'bg-blue-900 text-white border-blue-900' : 'bg-white text-gray-400'}">${String.fromCharCode(65 + idx)}</span>
-                        <span>${optionText}</span>
-                    </div>
-                `;
-                
-                button.onclick = () => selectOption(uniqueResponseStateKey, idx);
-                container.appendChild(button);
-            });
-
-            document.getElementById("prev-btn").disabled = (activeQuestionIndex === 0);
-            document.getElementById("next-btn").innerText = (activeQuestionIndex === activeQuestions.length - 1) ? "Submit Subject" : "Next";
-        }
-
-        function selectOption(responseSignatureKey, selectedIndex) {
-            examResponses[responseSignatureKey] = selectedIndex;
-            renderActiveQuestionCard();
-        }
-
-        function navigateQuestion(step) {
-            const targetIndex = activeQuestionIndex + step;
-            if (targetIndex >= 0 && targetIndex < activeQuestions.length) {
-                activeQuestionIndex = targetIndex;
-                renderActiveQuestionCard();
-            } else if (targetIndex >= activeQuestions.length) {
-                evaluateSubjectBlockTransition();
-            }
-        }
-
-        // ================= CHRONO CORE SECTIONS =================
-        function startCountdownTracker() {
-            const element = document.getElementById("timer-countdown");
-            const visualBox = document.getElementById("timer-box");
-
-            globalTimer = setInterval(() => {
-                secondsRemaining--;
-                let mins = Math.floor(secondsRemaining / 60);
-                let secs = secondsRemaining % 60;
-
-                element.innerText = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
-
-                if (secondsRemaining <= 300) {
-                    visualBox.className = "bg-red-600 p-3 rounded-lg flex justify-between items-center shadow text-white font-semibold animate-pulse";
-                } else {
-                    visualBox.className = "bg-emerald-700 p-3 rounded-lg flex justify-between items-center shadow text-white font-semibold";
-                }
-
-                if (secondsRemaining <= 0) {
-                    clearInterval(globalTimer);
-                    evaluateSubjectBlockTransition();
-                }
-            }, 1000);
-        }
-
-        function evaluateSubjectBlockTransition() {
-            const currentSubjectKey = SUBJECTS_REGISTRY[activeSubjectIndex].key;
-            let correctCount = 0;
-
-            activeQuestions.forEach((question, index) => {
-                const chosenAns = examResponses[`${currentSubjectKey}_Q${index}`];
-                if (chosenAns === question.a) correctCount++;
-            });
-
-            examPerformanceReport.push({
-                subject: currentSubjectKey,
-                score: correctCount,
-                total: activeQuestions.length
-            });
-
-            if (activeSubjectIndex < SUBJECTS_REGISTRY.length - 1) {
-                activeSubjectIndex++;
-                streamNextSubjectPayload();
-            } else {
-                processFinalTerminalSubmission();
-            }
-        }
-
-        // ================= RESILIENT PROCTORING CAM MODULES =================
-        function launchAntiCheatProctoring() {
-            document.addEventListener("visibilitychange", () => {
-                if (document.hidden) flagViolationEvent("App switch event flagged");
-            });
-
-            const videoElement = document.getElementById("proctor-cam-feed");
-            
-            if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                navigator.mediaDevices.getUserMedia({ 
-                    video: { 
-                        facingMode: "user", 
-                        width: { ideal: 160 }, 
-                        height: { ideal: 160 } 
-                    } 
-                })
-                .then((stream) => {
-                    if (videoElement) {
-                        videoElement.srcObject = stream;
-                    }
-                    setInterval(() => {
-                        if (Math.random() > 0.96) flagViolationEvent("Peripheral head turning tracked");
-                    }, 4000);
-                })
-                .catch((err) => {
-                    console.warn("Camera streaming inactive (Non-HTTPS or blocked context):", err);
-                    const badge = document.getElementById("cheat-warn-badge");
-                    if (badge) {
-                        badge.innerHTML = `<i class="fa-solid fa-camera-slash"></i> PROCTOR OFFLINE`;
-                        badge.classList.remove("hidden");
-                        setTimeout(() => badge.classList.add("hidden"), 4000);
-                    }
-                });
-            }
-        }
-
-        function flagViolationEvent(reasonString) {
-            cheatViolationsCount++;
-            const badge = document.getElementById("cheat-warn-badge");
-            badge.innerText = `⚠️ PROCTOR ALERT`;
-            badge.classList.remove("hidden");
-            
-            setTimeout(() => badge.classList.add("hidden"), 3000);
-            if (cheatViolationsCount >= 8) processFinalTerminalSubmission();
-        }
-
-        // ================= SUBMISSION TRANSACTION =================
-        async function processFinalTerminalSubmission() {
-            if (globalTimer) clearInterval(globalTimer);
-            shiftView(4);
-
-            try {
-                let cumulativeCorrect = 0;
-                let cumulativeTotal = 0;
-                let scoreBreakdownObject = {};
-
-                examPerformanceReport.forEach(block => {
-                    cumulativeCorrect += block.score;
-                    cumulativeTotal += block.total;
-                    scoreBreakdownObject[block.subject] = `${block.score}/${block.total}`;
-                });
-
-                const studentReportPayload = {
-                    candidateName: candidateProfile.name,
-                    candidateWhatsapp: candidateProfile.whatsapp,
-                    cumulativeScore: cumulativeCorrect,
-                    cumulativeTotalQuestions: cumulativeTotal,
-                    breakdown: scoreBreakdownObject,
-                    cheatViolationsCount: cheatViolationsCount,
-                    timestamp: serverTimestamp()
-                };
-
-                await addDoc(collection(db, "student_records"), studentReportPayload);
-                document.getElementById("terminal-success").classList.remove("hidden");
-
-            } catch (err) {
-                console.error("Critical submission pipeline error: ", err);
-                document.getElementById("terminal-failure").classList.remove("hidden");
-            }
-        }
-    </script>
-</body>
-</html>
+    
