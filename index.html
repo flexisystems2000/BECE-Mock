@@ -19,9 +19,9 @@
             color: #1e3a8a !important;
             font-weight: 600;
         }
-        /* Mobile-optimized feeds */
+        /* Mobile-optimized camera stream mirroring */
         #proctor-cam-feed {
-            transform: scaleX(-1); /* Mirror view for natural tracking */
+            transform: scaleX(-1);
             object-fit: cover;
         }
     </style>
@@ -180,7 +180,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
 
-        // Live Firebase Configuration Setup Aligned with your API panel
+        // Live Production Database Instance Layout Credentials
         const firebaseConfig = {
             apiKey: "AIzaSyAetpMyU7cX-cy5AiE5tYU3QkDeehmBvjk",
             authDomain: "bece-mock.firebaseapp.com",
@@ -191,11 +191,10 @@
             measurementId: "G-J40LL9WKLB"
         };
 
-        // Initialize App Instance
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // ================= REPOSITORY ASSETS CONFIGURATION =================
+        // Verified Repository Assets Links Aligned to Lowercase Structuring
         const REPO_BASE_URL = "https://raw.githubusercontent.com/flexisystems2000/BECE-exams/main/";
 
         const SUBJECTS_REGISTRY = [
@@ -210,11 +209,11 @@
             { key: "home-economics", file: "home-economics.json" },
             { key: "mathematics", file: "mathematics.json" },
             { key: "security-education", file: "security-education.json" },
-            { key: "social-studies", file: "social studies.json" }, // Safely routes the natural file space
+            { key: "social-studies", file: "social studies.json" }, 
             { key: "yoruba", file: "yoruba.json" }
         ];
 
-        // State Machine Management Objects
+        // Core Global Controller Scope Arrays
         let candidateProfile = { name: "", whatsapp: "" };
         let activeSubjectIndex = 0;
         let activeQuestions = [];
@@ -227,10 +226,12 @@
         let secondsRemaining = 40 * 60; 
         let cheatViolationsCount = 0;
 
+        // BIND MODULAR FUNCTIONS EXPLICITLY TO WINDOW TO RESOLVE HTML SUBMIT BLOCKS
         window.handleRegistration = handleRegistration;
         window.startExamination = startExamination;
         window.navigateQuestion = navigateQuestion;
         window.selectOption = selectOption;
+        window.streamNextSubjectPayload = streamNextSubjectPayload;
 
         function shiftView(pageNumber) {
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -244,31 +245,38 @@
             }
         }
 
-        // ================= GATE 1: TIME VALIDATION =================
+        // ================= ACTION 1: CANDIDATE LOGIN (TIME LOOKUP DROPPED) =================
         function handleRegistration(e) {
-            e.preventDefault();
-            const errNode = document.getElementById("gate-error");
-            errNode.classList.add("hidden");
-
-            const rightNow = new Date();
-            const currentHours = rightNow.getHours();
-            
-            if (currentHours < 9) {
-                errNode.innerText = "Access Forbidden! The examination session workspace opens strictly at 09:00AM.";
-                errNode.classList.remove("hidden");
-                return;
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
             }
 
-            candidateProfile.name = document.getElementById("student-name").value.trim();
-            candidateProfile.whatsapp = document.getElementById("student-whatsapp").value.trim();
+            const errNode = document.getElementById("gate-error");
+            if (errNode) errNode.classList.add("hidden");
+
+            const inputName = document.getElementById("student-name").value.trim();
+            const inputWhatsapp = document.getElementById("student-whatsapp").value.trim();
+
+            if (!inputName || !inputWhatsapp) {
+                if (errNode) {
+                    errNode.innerText = "Error: Input fields values cannot be left empty.";
+                    errNode.classList.remove("hidden");
+                }
+                return false;
+            }
+
+            candidateProfile.name = inputName;
+            candidateProfile.whatsapp = inputWhatsapp;
 
             document.getElementById("student-identity").innerText = `CANDIDATE: ${candidateProfile.name} (${candidateProfile.whatsapp})`;
             document.getElementById("student-identity").classList.remove("hidden");
 
             shiftView(2);
+            return false;
         }
 
-        // ================= DYNAMIC FILE-LINK STREAMING LAYER =================
+        // ================= ACTION 2: QUESTIONS STREAMING LAYER =================
         async function startExamination() {
             const loader = document.getElementById("fetch-loader");
             const errNode = document.getElementById("fetch-error");
@@ -353,8 +361,4 @@
                 const isSelected = examResponses[uniqueResponseStateKey] === idx;
                 
                 const button = document.createElement("button");
-                button.className = `option-btn w-full text-left p-4 rounded-xl border-2 transition-all font-medium text-sm sm:text-base flex items-center justify-between border-gray-200 hover:border-gray-300 hover:bg-gray-50 text-gray-700 ${isSelected ? 'selected' : ''}`;
-                
-                button.innerHTML = `
-                    <div class="flex items-center space-x-3">
-    
+                button.className = `option-btn w-full text-left p-4 rounded-xl border-2 transition-all font-medium text-sm sm:text-base flex items-center justify-between bor
