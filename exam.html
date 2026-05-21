@@ -984,7 +984,16 @@ window.addEventListener(
         */
 
         await startCamera();
-    });
+
+        /*
+        =================================
+        RUN THE QUESTION FETCH
+        =================================
+        */
+
+        await loadData();
+});
+
 /*
 =========================================
 LOAD QUESTIONS
@@ -1050,7 +1059,7 @@ async function loadData(){
         const res =
         await fetch(
 
-`https://raw.githubusercontent.com/flexisystems2000/BECE-exams/main/${sub.file}`
+`https://raw.githubusercontent.com/flexisystems2000/BECE-exams/main/${sub.file}?t=${Date.now()}`
 
         );
 
@@ -1078,15 +1087,29 @@ async function loadData(){
 
         /*
         =====================================
-        GET ACTUAL ARRAY
+        GET ACTUAL ARRAY DYNAMICALLY
         =====================================
         */
 
-        const firstKey =
-        Object.keys(data)[0];
+        if (Array.isArray(data)) {
 
-        questions =
-        data[firstKey] || [];
+            questions = data;
+
+        } else {
+
+            const arrayKey = 
+            Object.keys(data)
+            .find(key => 
+                Array.isArray(data[key])
+            );
+
+            questions = 
+            arrayKey 
+            ? 
+            data[arrayKey] 
+            : 
+            [];
+        }
 
         /*
         =====================================
@@ -1094,10 +1117,7 @@ async function loadData(){
         =====================================
         */
 
-        if(
-            !Array.isArray(questions) ||
-            !questions.length
-        ){
+        if(!questions.length){
 
             document.getElementById(
                 "qText"
