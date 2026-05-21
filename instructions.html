@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exam Instructions</title>
+    
+    <!-- Premium Google Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --brand-blue: #0b1f3a;
+            --brand-blue-hover: #13315c;
+            --bg-light: #f4f6f9;
+            --text-dark: #1e293b;
+            --text-muted: #64748b;
+            --border-color: #cbd5e1;
+            --warning-bg: #fef2f2;
+            --warning-border: #fee2e2;
+            --warning-text: #991b1b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-light);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        /* Plain White Container with Border Radius */
+        .instructions-container {
+            width: 100%;
+            max-width: 680px;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            border: 1px solid #e2e8f0;
+        }
+
+        /* Deep Blue Header Banner */
+        .portal-header {
+            background: var(--brand-blue);
+            padding: 32px 24px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        .portal-header h1 {
+            font-size: 26px;
+            font-weight: 700;
+            line-height: 1.3;
+            letter-spacing: -0.5px;
+        }
+
+        .portal-header p {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #93c5fd;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 500;
+        }
+
+        /* Instructions Main Body Content */
+        .portal-body {
+            padding: 36px 32px;
+        }
+
+        /* Metadata Information Grid */
+        .info-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            padding: 24px;
+            border-radius: 8px;
+            margin-bottom: 28px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+
+        @media (max-width: 500px) {
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .info-item strong {
+            color: var(--brand-blue);
+            font-weight: 600;
+            display: block;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 2px;
+        }
+
+        .info-item span {
+            color: var(--text-dark);
+            font-weight: 500;
+        }
+
+        .info-item-full {
+            grid-column: 1 / -1;
+        }
+
+        .subject-list {
+            margin-top: 6px;
+            padding-left: 20px;
+        }
+
+        .subject-list li {
+            font-weight: 500;
+            color: var(--text-dark);
+            margin-bottom: 4px;
+        }
+
+        /* Rules Layout */
+        .rules h2 {
+            color: var(--brand-blue);
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 8px;
+        }
+
+        .rules ul {
+            padding-left: 0;
+            list-style: none;
+        }
+
+        .rules li {
+            color: #334155;
+            font-size: 14px;
+            line-height: 1.6;
+            margin-bottom: 12px;
+            position: relative;
+            padding-left: 24px;
+        }
+
+        /* Custom Bullet Indicators */
+        .rules li::before {
+            content: "✓";
+            color: #10b981;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+
+        /* Refined Attention Box */
+        .warning-box {
+            margin-top: 28px;
+            background: var(--warning-bg);
+            border: 1px solid var(--warning-border);
+            padding: 16px;
+            border-radius: 8px;
+            color: var(--warning-text);
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .warning-box strong {
+            font-weight: 700;
+        }
+
+        /* Checkbox Validation Wrapper */
+        .checkbox-area {
+            margin-top: 24px;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            background: #fafafa;
+            padding: 16px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .checkbox-area input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            margin-top: 3px;
+            cursor: pointer;
+            accent-color: var(--brand-blue);
+        }
+
+        .checkbox-area label {
+            color: #334155;
+            font-size: 13.5px;
+            line-height: 1.5;
+            cursor: pointer;
+            font-weight: 500;
+            user-select: none;
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 28px;
+            border: none;
+            border-radius: 6px;
+            background: var(--brand-blue);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            font-family: inherit;
+            cursor: pointer;
+            transition: background 0.15s ease;
+        }
+
+        button:hover {
+            background: var(--brand-blue-hover);
+        }
+
+        .status {
+            margin-top: 14px;
+            text-align: center;
+            color: #ef4444;
+            font-size: 14px;
+            font-weight: 500;
+            min-height: 21px;
+        }
+
+        .footer {
+            margin-top: 36px;
+            text-align: center;
+            font-size: 11px;
+            color: var(--text-muted);
+            line-height: 1.5;
+            border-top: 1px solid #f1f5f9;
+            padding-top: 24px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="instructions-container">
+
+    <!-- Blue Header Element Box -->
+    <div class="portal-header">
+        <h1>Flexi Educational Consult<br>BECE Mock</h1>
+        <p>Examination Instructions & Candidate Guidelines</p>
+    </div>
+
+    <!-- Plain White Main Body Content Area -->
+    <div class="portal-body">
+
+        <div class="info-box">
+            <div class="info-grid">
+                <div class="info-item">
+                    <strong>Candidate</strong>
+                    <span id="candidateName">Loading...</span>
+                </div>
+                
+                <div class="info-item">
+                    <strong>WhatsApp Number</strong>
+                    <span id="candidatePhone">Loading...</span>
+                </div>
+                
+                <div class="info-item">
+                    <strong>Exam Day</strong>
+                    <span id="examDay">Loading...</span>
+                </div>
+
+                <div class="info-item">
+                    <strong>Duration</strong>
+                    <span>30 Minutes Per Subject</span>
+                </div>
+
+                <div class="info-item info-item-full">
+                    <strong>Today's Scheduled Subjects</strong>
+                    <ul class="subject-list" id="subjectList"></ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="rules">
+            <h2>Exam Rules</h2>
+            <ul>
+                <li>Candidates must remain focused on the exam screen at all times.</li>
+                <li>Camera monitoring will remain active throughout the examination.</li>
+                <li>Switching tabs, minimizing browser, or exiting fullscreen may trigger malpractice warnings.</li>
+                <li>Repeated malpractice attempts may cause automatic submission.</li>
+                <li>Candidates can only attempt each subject once.</li>
+                <li>All answers are automatically saved during the examination.</li>
+                <li>Ensure your device battery and internet connection are stable before proceeding.</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>Important Notice:</strong><br>
+            By proceeding to the examination, you agree to comply with all examination rules and understand that any suspicious activity may be recorded for review.
+        </div>
+
+        <div class="checkbox-area">
+            <input type="checkbox" id="agreement">
+            <label for="agreement">
+                I have read and understood all examination instructions and agree to comply with the rules of the examination.
+            </label>
+        </div>
+
+        <button onclick="startExam()">
+            Begin Examination
+        </button>
+
+        <div class="status" id="status"></div>
+
+        <div class="footer">
+            © 2026 Flexi Educational Consult.<br>
+            Powered by JarvisAI Technologies.
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+/*
+=========================================
+LOAD CANDIDATE DATA
+=========================================
+*/
+const candidateName = localStorage.getItem("candidateName");
+const candidatePhone = localStorage.getItem("candidatePhone");
+const examDay = localStorage.getItem("examDay");
+const todaysSubjects = JSON.parse(localStorage.getItem("todaysSubjects")) || [];
+
+/*
+=========================================
+DISPLAY CANDIDATE DATA
+=========================================
+*/
+document.getElementById("candidateName").innerText = candidateName || "Unknown";
+document.getElementById("candidatePhone").innerText = candidatePhone || "Unknown";
+document.getElementById("examDay").innerText = examDay || "Unknown";
+
+/*
+=========================================
+DISPLAY SUBJECTS
+=========================================
+*/
+const subjectList = document.getElementById("subjectList");
+
+if (todaysSubjects.length > 0) {
+    todaysSubjects.forEach(subject => {
+        const li = document.createElement("li");
+        li.innerText = subject.subject;
+        subjectList.appendChild(li);
+    });
+} else {
+    const li = document.createElement("li");
+    li.innerText = "No subjects found";
+    subjectList.appendChild(li);
+}
+
+/*
+=========================================
+START EXAM
+=========================================
+*/
+function startExam(){
+    const agreement = document.getElementById("agreement");
+    const status = document.getElementById("status");
+
+    status.innerText = "";
+
+    if(!agreement.checked){
+        status.innerText = "You must agree to the examination rules before proceeding.";
+        return;
+    }
+
+    localStorage.setItem("examStarted", "true");
+    localStorage.setItem("examStartTime", Date.now());
+
+    window.location.href = "exam.html";
+}
+</script>
+
+</body>
+</html>

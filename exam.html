@@ -1,0 +1,1735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8" />
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0" />
+
+<title>BECE Examination</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.min.js"></script>
+
+<!-- FIREBASE -->
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    user-select:none;
+    -webkit-user-select:none;
+}
+
+body{
+    font-family:Arial,sans-serif;
+    background:#f5f7fb;
+    overflow-x:hidden;
+}
+
+.topbar{
+    background:#0b1f3a;
+    color:white;
+    padding:15px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.controls{
+    display:flex;
+    gap:15px;
+    align-items:center;
+}
+
+/*
+=========================================
+CALCULATOR
+=========================================
+*/
+
+.calc-panel{
+    display:none;
+    position:absolute;
+    top:70px;
+    right:20px;
+    background:white;
+    color:black;
+    padding:15px;
+    border-radius:12px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.3);
+    width:320px;
+    z-index:1001;
+}
+
+.calc-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:6px;
+    margin-top:10px;
+}
+
+.calc-grid button{
+    padding:12px 5px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+    background:#eef2f7;
+    color:#0b1f3a;
+    font-size:13px;
+}
+
+.calc-grid button.operator{
+    background:#dbe5f3;
+}
+
+.calc-grid button.action{
+    background:#0b1f3a;
+    color:white;
+}
+
+.calc-grid button.danger{
+    background:#d9534f;
+    color:white;
+}
+
+.calc-toggle{
+    background:#008000;
+    color:white;
+    border:none;
+    padding:10px 15px;
+    border-radius:6px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+/*
+=========================================
+MAIN
+=========================================
+*/
+
+.main-container{
+    padding:20px;
+    max-width:900px;
+    margin:auto;
+}
+
+.question-card{
+    background:white;
+    padding:30px;
+    border-radius:12px;
+    box-shadow:0 4px 6px rgba(0,0,0,0.05);
+}
+
+.nav-btns{
+    display:flex;
+    gap:10px;
+    margin-top:20px;
+}
+
+button{
+    padding:12px 25px;
+    cursor:pointer;
+    border:none;
+    border-radius:6px;
+    background:#0b1f3a;
+    color:white;
+}
+
+/*
+=========================================
+QUESTION TABS
+=========================================
+*/
+
+.tab-grid{
+
+    display:grid;
+
+    grid-template-columns:
+    repeat(5, 1fr);
+
+    gap:6px;
+
+    margin-bottom:20px;
+}
+
+.tab-btn{
+
+    height:42px;
+
+    border:none;
+
+    border-radius:6px;
+
+    background:#d9d9d9;
+
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+.tab-btn.active{
+    background:#0b1f3a;
+    color:white;
+}
+
+.tab-btn.answered{
+    background:#008000;
+    color:white;
+}
+
+/*
+=========================================
+CAMERA
+=========================================
+*/
+
+#camera{
+    width:120px;
+    height:90px;
+    background:black;
+    border-radius:8px;
+    margin-bottom:15px;
+    border:2px solid #0b1f3a;
+}
+
+/*
+=========================================
+CALCULATOR INPUT
+=========================================
+*/
+
+#calcInput{
+    width:100%;
+    padding:12px;
+    margin-bottom:10px;
+    font-size:18px;
+    border:2px solid #dbe5f3;
+    border-radius:6px;
+    outline:none;
+}
+
+/*
+=========================================
+OPTIONS
+=========================================
+*/
+
+.optionBtn{
+    display:block;
+    width:100%;
+    margin:8px 0;
+    padding:15px;
+    text-align:left;
+    background:#eef2f7;
+    color:#111;
+}
+
+.optionBtn.selected{
+    background:#0b1f3a;
+    color:white;
+}
+
+/*
+=========================================
+MODAL
+=========================================
+*/
+
+#submitModal{
+    display:none;
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:rgba(0,0,0,0.75);
+    z-index:99999;
+    justify-content:center;
+    align-items:center;
+    padding:20px;
+}
+
+.modal-content{
+    background:white;
+    width:100%;
+    max-width:400px;
+    border-radius:12px;
+    padding:30px;
+    text-align:center;
+}
+
+.modal-content h2{
+    color:#0b1f3a;
+    margin-bottom:15px;
+}
+
+.modal-content p{
+    color:#444;
+    line-height:1.7;
+    margin-bottom:20px;
+}
+
+.modal-content button{
+    background:#0b1f3a;
+}
+
+/*
+=========================================
+MOBILE
+=========================================
+*/
+
+@media(max-width:768px){
+
+    .question-card{
+        padding:20px;
+    }
+
+    .calc-panel{
+        width:95%;
+        right:2.5%;
+    }
+}
+
+</style>
+
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<div class="topbar">
+
+    <h2>
+        Flexi Educational Consult BECE Mock
+    </h2>
+
+    <div class="controls">
+
+        <div id="timer"
+        style="font-weight:bold;font-size:18px;">
+
+            60:00
+
+        </div>
+
+        <button class="calc-toggle"
+        onclick="toggleCalc(event)">
+
+            Calculator
+
+        </button>
+
+    </div>
+
+</div>
+
+<!-- CALCULATOR -->
+
+<div class="calc-panel" id="calcPanel">
+
+    <input type="text"
+    id="calcInput"
+    readonly />
+
+    <div class="calc-grid">
+
+        <button class="danger"
+        onclick="clearCalc()">
+
+            AC
+
+        </button>
+
+        <button class="danger"
+        onclick="deleteChar()">
+
+            DEL
+
+        </button>
+
+        <button onclick="append('(')">(</button>
+
+        <button onclick="append(')')">)</button>
+
+        <button class="operator"
+        onclick="append('sqrt(')">
+
+            √
+
+        </button>
+
+        <button class="operator"
+        onclick="append('/')">
+
+            ÷
+
+        </button>
+
+        <button class="operator"
+        onclick="append('*')">
+
+            ×
+
+        </button>
+
+        <button class="operator"
+        onclick="append('-')">
+
+            −
+
+        </button>
+
+        <button class="operator"
+        onclick="append('sin(')">
+
+            sin
+
+        </button>
+
+        <button class="operator"
+        onclick="append('cos(')">
+
+            cos
+
+        </button>
+
+        <button class="operator"
+        onclick="append('tan(')">
+
+            tan
+
+        </button>
+
+        <button class="operator"
+        onclick="append('+')">
+
+            +
+
+        </button>
+
+        <button onclick="append('7')">7</button>
+        <button onclick="append('8')">8</button>
+        <button onclick="append('9')">9</button>
+
+        <button onclick="append('%')">%</button>
+
+        <button onclick="append('4')">4</button>
+        <button onclick="append('5')">5</button>
+        <button onclick="append('6')">6</button>
+
+        <button onclick="append('²')">x²</button>
+
+        <button onclick="append('1')">1</button>
+        <button onclick="append('2')">2</button>
+        <button onclick="append('3')">3</button>
+
+        <button class="action"
+        onclick="solve()"
+        style="grid-row:span 2;">
+
+            =
+
+        </button>
+
+        <button onclick="append('0')"
+        style="grid-column:span 2;">
+
+            0
+
+        </button>
+
+        <button onclick="append('.')">.</button>
+
+    </div>
+
+</div>
+
+<!-- MAIN -->
+
+<div class="main-container">
+
+    <video id="camera"
+    autoplay
+    muted
+    playsinline></video>
+
+    <div class="question-card">
+
+        <div id="subjectBox"
+        style="
+        margin-bottom:15px;
+        background:#eef2f7;
+        padding:12px;
+        border-radius:6px;
+        font-weight:bold;
+        color:#0b1f3a;
+        ">
+        </div>
+
+        <div id="qText"
+        style="
+        font-size:18px;
+        margin-bottom:20px;
+        line-height:1.6;
+        ">
+            Loading Questions...
+        </div>
+
+        <div id="optionsCont"></div>
+
+        <div class="nav-btns">
+
+            <button onclick="changeQ(-1)">
+                Previous
+            </button>
+
+            <button onclick="changeQ(1)">
+                Next
+            </button>
+
+            <button
+            onclick="submitExam(false)"
+            style="
+            background:#008000;
+            margin-left:auto;
+            ">
+
+                Submit Exam
+
+            </button>
+
+        </div>
+        
+        <div id="warn"
+        style="
+        color:red;
+        margin-top:10px;
+        font-weight:bold;
+        ">
+        </div>
+
+    </div>
+
+</div>
+
+        <div class="tab-grid"
+        id="tabGrid"></div>
+<!-- SUBMISSION MODAL -->
+
+<div id="submitModal">
+
+    <div class="modal-content">
+
+        <h2 id="modalTitle"></h2>
+
+        <p id="modalMessage"></p>
+
+        <button onclick="closeModal()">
+
+            Close
+
+        </button>
+
+    </div>
+
+</div>
+<script>
+
+/*
+=========================================
+FIREBASE CONFIG
+=========================================
+*/
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyAetpMyU7cX-cy5AiE5tYU3QkDeehmBvjk",
+
+    authDomain: "bece-mock.firebaseapp.com",
+
+    projectId: "bece-mock",
+
+    storageBucket: "bece-mock.firebasestorage.app",
+
+    messagingSenderId: "819184946985",
+
+    appId: "1:819184946985:web:d8fce2d2a84d7b7b297138"
+
+};
+
+firebase.initializeApp(firebaseConfig);
+
+const db =
+firebase.firestore();
+
+/*
+=========================================
+PREVENT REOPEN
+=========================================
+*/
+
+if(
+
+    localStorage.getItem(
+        "examSubmitted"
+    ) === "true"
+
+){
+
+    document.body.innerHTML =
+
+    `
+    <div style="
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#0b1f3a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    font-family:Arial;
+    ">
+
+        <div>
+
+            <h1>
+                Examination Already Submitted
+            </h1>
+
+        </div>
+
+    </div>
+    `;
+}
+
+/*
+=========================================
+EXAM VARIABLES
+=========================================
+*/
+
+let questions = [];
+
+let cur = 0;
+
+let malpractice = 0;
+
+let answers =
+
+JSON.parse(
+
+    localStorage.getItem(
+        "examAnswers"
+    )
+
+) || {};
+
+/*
+=========================================
+YOUR TIMER
+=========================================
+*/
+
+let timeRemaining = 60 * 60;
+
+/*
+=========================================
+TIMER
+=========================================
+*/
+
+const timerInterval =
+
+setInterval(() => {
+
+    if(timeRemaining <= 0){
+
+        clearInterval(
+            timerInterval
+        );
+
+        submitExam(true);
+
+    }else{
+
+        timeRemaining--;
+
+        let m =
+
+        Math.floor(
+            timeRemaining / 60
+        );
+
+        let s =
+        timeRemaining % 60;
+
+        document.getElementById(
+            "timer"
+        ).innerText =
+
+        `${m}:${s
+        .toString()
+        .padStart(2,'0')}`;
+    }
+
+},1000);
+
+/*
+=========================================
+START CAMERA
+=========================================
+*/
+
+async function startCamera(){
+
+    const video =
+
+    document.getElementById(
+        "camera"
+    );
+
+    try{
+
+        /*
+        =================================
+        CHECK SUPPORT
+        =================================
+        */
+
+        if(
+
+            !navigator.mediaDevices ||
+
+            !navigator.mediaDevices.getUserMedia
+
+        ){
+
+            flag(
+                "Camera unsupported"
+            );
+
+            return;
+        }
+
+        /*
+        =================================
+        REQUEST CAMERA
+        =================================
+        */
+
+        const stream =
+
+        await navigator
+        .mediaDevices
+        .getUserMedia({
+
+            video:{
+
+                facingMode:"user",
+
+                width:{
+                    ideal:320
+                },
+
+                height:{
+                    ideal:240
+                }
+
+            },
+
+            audio:false
+        });
+
+        /*
+        =================================
+        ATTACH STREAM
+        =================================
+        */
+
+        video.srcObject = stream;
+
+        /*
+        =================================
+        MOBILE SAFE
+        =================================
+        */
+
+        video.setAttribute(
+            "autoplay",
+            true
+        );
+
+        video.setAttribute(
+            "muted",
+            true
+        );
+
+        video.setAttribute(
+            "playsinline",
+            true
+        );
+
+        /*
+        =================================
+        FORCE PLAY
+        =================================
+        */
+
+        await video.play();
+
+        console.log(
+            "Camera active"
+        );
+
+        /*
+        =================================
+        LOAD AI MODELS
+        =================================
+        */
+
+        await faceapi.nets
+        .tinyFaceDetector
+        .loadFromUri(
+
+        'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'
+
+        );
+
+        await faceapi.nets
+        .faceLandmark68Net
+        .loadFromUri(
+
+        'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/'
+
+        );
+
+        /*
+        =================================
+        START AI DETECTION
+        =================================
+        */
+
+        setInterval(async () => {
+
+            if(video.readyState !== 4)
+            return;
+
+            const detections =
+
+            await faceapi
+
+            .detectAllFaces(
+
+                video,
+
+                new faceapi
+                .TinyFaceDetectorOptions()
+
+            )
+
+            .withFaceLandmarks();
+
+            /*
+            =============================
+            NO FACE
+            =============================
+            */
+
+            if(detections.length === 0){
+
+                flag(
+                    "No face detected!"
+                );
+
+                return;
+            }
+
+            /*
+            =============================
+            MULTIPLE FACES
+            =============================
+            */
+
+            if(detections.length > 1){
+
+                flag(
+                    "Multiple faces detected!"
+                );
+
+                return;
+            }
+
+            /*
+            =============================
+            FACE CENTERING
+            =============================
+            */
+
+            const landmarks =
+            detections[0]
+            .landmarks;
+
+            const nose =
+            landmarks.getNose();
+
+            const jaw =
+            landmarks.getJawOutline();
+
+            const leftJaw =
+            jaw[0].x;
+
+            const rightJaw =
+            jaw[16].x;
+
+            const noseX =
+            nose[3].x;
+
+            const center =
+            (leftJaw + rightJaw)
+            / 2;
+
+            const deviation =
+
+            Math.abs(
+                noseX - center
+            );
+
+            /*
+            =============================
+            LOOKING AWAY
+            =============================
+            */
+
+            if(deviation > 35){
+
+                flag(
+                    "Face not centered!"
+                );
+            }
+
+        },5000);
+
+    }catch(error){
+
+        console.log(error);
+
+        document.getElementById(
+            "warn"
+        ).innerText =
+
+        "Camera access denied.";
+    }
+}
+
+/*
+=========================================
+AUTO START
+=========================================
+*/
+
+window.addEventListener(
+
+    "load",
+
+    async () => {
+
+        /*
+        =================================
+        SAFE FULLSCREEN
+        =================================
+        */
+
+        try{
+
+            if(
+
+                document
+                .documentElement
+                .requestFullscreen
+
+            ){
+
+                await document
+                .documentElement
+                .requestFullscreen();
+            }
+
+        }catch(e){
+
+            console.log(
+                "Fullscreen unsupported"
+            );
+        }
+
+        /*
+        =================================
+        START CAMERA
+        =================================
+        */
+
+        await startCamera();
+
+        /*
+        =================================
+        LOAD QUESTIONS
+        =================================
+        */
+
+        loadData();
+    }
+);
+
+/*
+=========================================
+LOAD QUESTIONS
+=========================================
+*/
+
+async function loadData(){
+
+    const subjects =
+
+    JSON.parse(
+
+        localStorage.getItem(
+            "todaysSubjects"
+        )
+
+    );
+
+    const sub =
+
+    subjects?.[0]
+
+    ||
+
+    {
+        file:"mathematics.json",
+        subject:"Mathematics"
+    };
+
+    document.getElementById(
+        "subjectBox"
+    ).innerText =
+    sub.subject;
+
+    try{
+
+        const res =
+
+        await fetch(
+
+`https://raw.githubusercontent.com/flexisystems2000/BECE-exams/main/${sub.file}`
+
+        );
+
+        const data =
+        await res.json();
+
+        /*
+        =================================
+        SUPPORT DIFFERENT JSON STRUCTURES
+        =================================
+        */
+
+        if(Array.isArray(data)){
+
+            questions = data;
+
+        }else if(data.questions){
+
+            questions =
+            data.questions;
+
+        }else{
+
+            questions = [];
+        }
+
+        /*
+        =================================
+        RANDOMIZE
+        =================================
+        */
+
+        questions.sort(() =>
+            Math.random() - 0.5
+        );
+
+        render();
+
+    }catch(error){
+
+        console.log(error);
+
+        document.getElementById(
+            "qText"
+        ).innerText =
+
+        "Error loading questions.";
+    }
+}
+
+/*
+=========================================
+RENDER QUESTIONS
+=========================================
+*/
+
+function render(){
+
+    if(!questions.length){
+
+        document.getElementById(
+            "qText"
+        ).innerText =
+
+        "No questions available.";
+
+        return;
+    }
+
+    const q =
+    questions[cur];
+
+    document.getElementById(
+        "qText"
+    ).innerText =
+
+    `${cur + 1}. ${q.question}`;
+
+    const cont =
+
+    document.getElementById(
+        "optionsCont"
+    );
+
+    cont.innerHTML = "";
+
+    /*
+    =====================================
+    FIX DIFFERENT OPTION STRUCTURES
+    =====================================
+    */
+
+    const options = {
+
+        A:
+        q.optionA || q.A || "",
+
+        B:
+        q.optionB || q.B || "",
+
+        C:
+        q.optionC || q.C || "",
+
+        D:
+        q.optionD || q.D || ""
+    };
+
+    Object.keys(options)
+    .forEach(k => {
+
+        const btn =
+        document.createElement(
+            "button"
+        );
+
+        btn.className =
+        "optionBtn";
+
+        btn.innerText =
+
+        `${k}. ${options[k]}`;
+
+        btn.onclick = () => {
+
+            answers[cur] = k;
+
+            localStorage.setItem(
+
+                "examAnswers",
+
+                JSON.stringify(
+                    answers
+                )
+            );
+
+            render();
+        };
+
+        if(
+            answers[cur] === k
+        ){
+
+            btn.classList.add(
+                "selected"
+            );
+        }
+
+        cont.appendChild(btn);
+    });
+
+    /*
+    =====================================
+    QUESTION GRID
+    =====================================
+    */
+
+    const tabs =
+
+    document.getElementById(
+        "tabGrid"
+    );
+
+    tabs.innerHTML = "";
+
+    questions.forEach((_,i) => {
+
+        const t =
+        document.createElement(
+            "button"
+        );
+
+        t.className =
+        "tab-btn";
+
+        if(i === cur){
+
+            t.classList.add(
+                "active"
+            );
+        }
+
+        if(answers[i]){
+
+            t.classList.add(
+                "answered"
+            );
+        }
+
+        t.innerText = i + 1;
+
+        t.onclick = () => {
+
+            cur = i;
+
+            render();
+        };
+
+        tabs.appendChild(t);
+    });
+}
+
+/*
+=========================================
+NAVIGATION
+=========================================
+*/
+
+function changeQ(dir){
+
+    if(questions[cur + dir]){
+
+        cur += dir;
+
+        render();
+    }
+}
+
+/*
+=========================================
+YOUR CALCULATOR
+=========================================
+*/
+
+function toggleCalc(event){
+
+    event.stopPropagation();
+
+    const p =
+
+    document.getElementById(
+        "calcPanel"
+    );
+
+    p.style.display =
+
+    p.style.display === "block"
+
+    ?
+
+    "none"
+
+    :
+
+    "block";
+}
+
+function append(v){
+
+    document.getElementById(
+        "calcInput"
+    ).value += v;
+}
+
+function clearCalc(){
+
+    document.getElementById(
+        "calcInput"
+    ).value = "";
+}
+
+function deleteChar(){
+
+    let i =
+
+    document.getElementById(
+        "calcInput"
+    );
+
+    i.value =
+    i.value.slice(0,-1);
+}
+
+function sin(x){
+
+    return Math.sin(
+        x * Math.PI / 180
+    );
+}
+
+function cos(x){
+
+    return Math.cos(
+        x * Math.PI / 180
+    );
+}
+
+function tan(x){
+
+    return Math.tan(
+        x * Math.PI / 180
+    );
+}
+
+function sqrt(x){
+
+    return Math.sqrt(x);
+}
+
+function solve(){
+
+    const input =
+
+    document.getElementById(
+        "calcInput"
+    );
+
+    try{
+
+        let exp =
+        input.value;
+
+        exp =
+        exp.replace(/²/g,'**2');
+
+        exp =
+        exp.replace(/%/g,'/100');
+
+        const open =
+
+        (exp.match(/\(/g)||[])
+        .length;
+
+        const close =
+
+        (exp.match(/\)/g)||[])
+        .length;
+
+        if(open > close){
+
+            exp += ")"
+            .repeat(open-close);
+        }
+
+        let result =
+        eval(exp);
+
+        if(
+
+            result === Infinity ||
+
+            isNaN(result)
+
+        ){
+
+            input.value = "Err";
+
+        }else{
+
+            input.value =
+
+            parseFloat(
+                result.toFixed(10)
+            );
+        }
+
+    }catch(e){
+
+        input.value = "Err";
+    }
+}
+
+/*
+=========================================
+WARNING SYSTEM
+=========================================
+*/
+
+function flag(reason){
+
+    malpractice++;
+
+    document.getElementById(
+        "warn"
+    ).innerText =
+
+    `Warning ${malpractice}/3:
+    ${reason}`;
+
+    if(malpractice >= 3){
+
+        submitExam(true);
+    }
+}
+
+/*
+=========================================
+SHOW MODAL
+=========================================
+*/
+
+function showModal(title,message){
+
+    document.getElementById(
+        "modalTitle"
+    ).innerText = title;
+
+    document.getElementById(
+        "modalMessage"
+    ).innerText = message;
+
+    document.getElementById(
+        "submitModal"
+    ).style.display = "flex";
+}
+
+/*
+=========================================
+CLOSE MODAL
+=========================================
+*/
+
+function closeModal(){
+
+    document.getElementById(
+        "submitModal"
+    ).style.display = "none";
+
+    document.body.innerHTML =
+
+    `
+    <div style="
+    height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    font-family:Arial;
+    background:#0b1f3a;
+    color:white;
+    text-align:center;
+    padding:20px;
+    ">
+
+        <div>
+
+            <h1>
+                Examination Ended
+            </h1>
+
+            <p style="margin-top:15px;">
+
+                Your submission has been received successfully.
+
+            </p>
+
+        </div>
+
+    </div>
+    `;
+}
+
+/*
+=========================================
+SUBMIT TO FIRESTORE
+=========================================
+*/
+
+async function submitExam(isForced){
+
+    if(
+
+        isForced ||
+
+        confirm(
+            "Are you sure you want to submit your examination?"
+        )
+
+    ){
+
+        let score = 0;
+
+        questions.forEach((q,index)=>{
+
+            const correctAnswer =
+
+            q.answer ||
+            q.correctAnswer ||
+            "";
+
+            if(
+
+                answers[index] ===
+                correctAnswer
+
+            ){
+
+                score++;
+            }
+        });
+
+        const percentage =
+
+        (
+            (score/questions.length)
+            * 100
+        ).toFixed(2);
+
+        const candidateName =
+
+        localStorage.getItem(
+            "candidateName"
+        ) || "Unknown";
+
+        const candidatePhone =
+
+        localStorage.getItem(
+            "candidatePhone"
+        ) || "Unknown";
+
+        const subjectData =
+
+        JSON.parse(
+
+            localStorage.getItem(
+                "todaysSubjects"
+            )
+
+        )?.[0];
+
+        const subject =
+
+        subjectData?.subject ||
+        "Unknown";
+
+        try{
+
+            await db
+            .collection("results")
+            .add({
+
+                candidateName,
+
+                candidatePhone,
+
+                subject,
+
+                score,
+
+                total:
+                questions.length,
+
+                percentage,
+
+                malpractice,
+
+                answers,
+
+                submittedAt:
+                firebase.firestore
+                .FieldValue
+                .serverTimestamp()
+
+            });
+
+            localStorage.setItem(
+                "examSubmitted",
+                "true"
+            );
+
+            localStorage.removeItem(
+                "examAnswers"
+            );
+
+            showModal(
+
+                "Submission Successful",
+
+                "Your examination has been submitted successfully."
+
+            );
+
+        }catch(error){
+
+            console.log(error);
+
+            showModal(
+
+                "Submission Failed",
+
+                "Unable to submit your examination."
+
+            );
+        }
+    }
+}
+
+/*
+=========================================
+MALPRACTICE DETECTION
+=========================================
+*/
+
+document.addEventListener(
+
+    "visibilitychange",
+
+    () => {
+
+        if(document.hidden){
+
+            flag(
+                "Tab or App switch detected!"
+            );
+        }
+    }
+);
+
+document.addEventListener(
+
+    "fullscreenchange",
+
+    () => {
+
+        if(
+
+            !document
+            .fullscreenElement
+
+        ){
+
+            flag(
+                "Fullscreen exited!"
+            );
+        }
+    }
+);
+
+/*
+=========================================
+BLOCK RIGHT CLICK
+=========================================
+*/
+
+document.addEventListener(
+
+    "contextmenu",
+
+    e => e.preventDefault()
+);
+
+/*
+=========================================
+BLOCK COPYING
+=========================================
+*/
+
+document.addEventListener(
+
+    "copy",
+
+    e => e.preventDefault()
+);
+
+/*
+=========================================
+BLOCK SHORTCUTS
+=========================================
+*/
+
+document.addEventListener(
+
+    "keydown",
+
+    e => {
+
+        if (
+
+            e.key === "F12"
+
+            ||
+
+            (
+
+                e.ctrlKey
+
+                &&
+
+                (
+                    e.key === 'u'
+                    ||
+                    e.key === 'U'
+                    ||
+                    e.key === 'c'
+                    ||
+                    e.key === 'C'
+                )
+            )
+
+        ){
+
+            e.preventDefault();
+        }
+    }
+);
+
+</script>
+</body>
+</html>
