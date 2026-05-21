@@ -825,105 +825,83 @@ async function startCamera(){
         =================================
         */
 
+        let isProcessingFace = false; // Prevents overlapping frames
+
         setInterval(async () => {
 
-            if(video.readyState !== 4)
+            if(video.readyState !== 4 || isProcessingFace)
             return;
 
-            const detections =
+            try {
+                isProcessingFace = true; // Lock the gate
 
-            await faceapi
+                const detections =
+                await faceapi
+                .detectAllFaces(
+                    video,
+                    new faceapi.TinyFaceDetectorOptions()
+                )
+                .withFaceLandmarks();
 
-            .detectAllFaces(
+                /*
+                =============================
+                NO FACE
+                =============================
+                */
 
-                video,
+                if(detections.length === 0){
+                    flag("No face detected!");
+                    isProcessingFace = false; // Unlock on finish
+                    return;
+                }
 
-                new faceapi
-                .TinyFaceDetectorOptions()
+                /*
+                =============================
+                MULTIPLE FACES
+                =============================
+                */
 
-            )
+                if(detections.length > 1){
+                    flag("Multiple faces detected!");
+                    isProcessingFace = false; // Unlock on finish
+                    return;
+                }
 
-            .withFaceLandmarks();
+                /*
+                =============================
+                FACE CENTERING
+                =============================
+                */
 
-            /*
-            =============================
-            NO FACE
-            =============================
-            */
+                const landmarks = detections[0].landmarks;
+                const nose = landmarks.getNose();
+                const jaw = landmarks.getJawOutline();
 
-            if(detections.length === 0){
+                const leftJaw = jaw[0].x;
+                const rightJaw = jaw[16].x;
+                const noseX = nose[3].x;
 
-                flag(
-                    "No face detected!"
-                );
+                const center = (leftJaw + rightJaw) / 2;
+                const deviation = Math.abs(noseX - center);
 
-                return;
+                /*
+                =============================
+                LOOKING AWAY
+                =============================
+                */
+
+                if(deviation > 35){
+                    flag("Face not centered!");
+                }
+
+            } catch (err) {
+                console.log("Face API processing error:", err);
+            } finally {
+                isProcessingFace = false; // Always unlock the gate for the next 5s interval
             }
 
-            /*
-            =============================
-            MULTIPLE FACES
-            =============================
-            */
+        }, 5000);
 
-            if(detections.length > 1){
-
-                flag(
-                    "Multiple faces detected!"
-                );
-
-                return;
-            }
-
-            /*
-            =============================
-            FACE CENTERING
-            =============================
-            */
-
-            const landmarks =
-            detections[0]
-            .landmarks;
-
-            const nose =
-            landmarks.getNose();
-
-            const jaw =
-            landmarks.getJawOutline();
-
-            const leftJaw =
-            jaw[0].x;
-
-            const rightJaw =
-            jaw[16].x;
-
-            const noseX =
-            nose[3].x;
-
-            const center =
-            (leftJaw + rightJaw)
-            / 2;
-
-            const deviation =
-
-            Math.abs(
-                noseX - center
-            );
-
-            /*
-            =============================
-            LOOKING AWAY
-            =============================
-            */
-
-            if(deviation > 35){
-
-                flag(
-                    "Face not centered!"
-                );
-            }
-
-        },5000);
 
     }catch(error){
 
