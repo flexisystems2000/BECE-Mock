@@ -819,85 +819,73 @@ async function startCamera(){
 
         );
 
+        
+
         /*
         =================================
-        START AI DETECTION
+        START LIGHTWEIGHT MOBILE DETECTION
         =================================
         */
 
-        let isProcessingFace = false; // Prevents overlapping frames
+        let isProcessingFace = false;
+        let missingFaceCount = 0; // Grace period counter for mobile camera adjustments
 
         setInterval(async () => {
 
-            if(video.readyState !== 4 || isProcessingFace)
-            return;
+            // Halt if video isn't ready, already processing a frame, or models aren't loaded
+            if (
+                video.readyState !== 4 || 
+                isProcessingFace || 
+                !faceapi.nets.tinyFaceDetector.params
+            ) {
+                return;
+            }
 
             try {
-                isProcessingFace = true; // Lock the gate
+                isProcessingFace = true; // Lock frame
 
-                const detections =
-                await faceapi
-                .detectAllFaces(
-                    video,
-                    new faceapi.TinyFaceDetectorOptions()
-                )
-                .withFaceLandmarks();
+                // STRIPPED DOWN: No landmarks, tiny input matrix size for mobile speed
+                const detections = await faceapi.detectAllFaces(
+                    video, 
+                    new faceapi.TinyFaceDetectorOptions({ 
+                        inputSize: 128,        // Smallest matrix size = fast execution
+                        scoreThreshold: 0.45   // Balanced sensitivity for mobile cameras
+                    })
+                ); // Removed .withFaceLandmarks() completely
 
                 /*
                 =============================
-                NO FACE
+                STABILIZED MALPRACTICE MATH
                 =============================
                 */
 
-                if(detections.length === 0){
-                    flag("No face detected!");
-                    isProcessingFace = false; // Unlock on finish
+                // 1. Presence Verification
+                if (detections.length === 0) {
+                    missingFaceCount++;
+                    
+                    // Only flag if the face is missing for 4 consecutive loops (20 full seconds)
+                    if (missingFaceCount >= 4) {
+                        flag("Jarvis AI: No face detected!");
+                    }
+                    
+                    isProcessingFace = false;
                     return;
                 }
 
-                /*
-                =============================
-                MULTIPLE FACES
-                =============================
-                */
+                // Cleanly reset the counter the moment a face is found
+                missingFaceCount = 0;
 
-                if(detections.length > 1){
-                    flag("Multiple faces detected!");
-                    isProcessingFace = false; // Unlock on finish
+                // 2. Multiple Candidates Verification
+                if (detections.length > 1) {
+                    flag("Jarvis AI: Multiple faces detected!");
+                    isProcessingFace = false;
                     return;
-                }
-
-                /*
-                =============================
-                FACE CENTERING
-                =============================
-                */
-
-                const landmarks = detections[0].landmarks;
-                const nose = landmarks.getNose();
-                const jaw = landmarks.getJawOutline();
-
-                const leftJaw = jaw[0].x;
-                const rightJaw = jaw[16].x;
-                const noseX = nose[3].x;
-
-                const center = (leftJaw + rightJaw) / 2;
-                const deviation = Math.abs(noseX - center);
-
-                /*
-                =============================
-                LOOKING AWAY
-                =============================
-                */
-
-                if(deviation > 35){
-                    flag("Face not centered!");
                 }
 
             } catch (err) {
-                console.log("Face API processing error:", err);
+                console.log("Frame dropped safely to prevent lag:", err);
             } finally {
-                isProcessingFace = false; // Always unlock the gate for the next 5s interval
+                isProcessingFace = false; // Safely unlock for the next 5-second interval
             }
 
         }, 5000);
@@ -911,7 +899,7 @@ async function startCamera(){
             "warn"
         ).innerText =
 
-        "Camera access denied.";
+        "Jarvis AI: Camera access denied.";
     }
 }
 
