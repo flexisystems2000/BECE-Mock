@@ -985,16 +985,6 @@ window.addEventListener(
 
         await startCamera();
 
-        /*
-        =================================
-        LOAD QUESTIONS
-        =================================
-        */
-
-        loadData();
-    }
-);
-
 /*
 =========================================
 LOAD QUESTIONS
@@ -1003,74 +993,136 @@ LOAD QUESTIONS
 
 async function loadData(){
 
-    const subjects =
-
-    JSON.parse(
-
-        localStorage.getItem(
-            "todaysSubjects"
-        )
-
-    );
-
-    const sub =
-
-    subjects?.[0]
-
-    ||
-
-    {
-        file:"mathematics.json",
-        subject:"Mathematics"
-    };
-
-    document.getElementById(
-        "subjectBox"
-    ).innerText =
-    sub.subject;
-
     try{
 
-        const res =
+        /*
+        =====================================
+        GET SUBJECT
+        =====================================
+        */
 
+        const subjects = JSON.parse(
+            localStorage.getItem(
+                "todaysSubjects"
+            )
+        );
+
+        if(
+            !subjects ||
+            !subjects.length
+        ){
+
+            document.getElementById(
+                "qText"
+            ).innerText =
+
+            "No subject scheduled.";
+
+            return;
+        }
+
+        /*
+        =====================================
+        FIRST SUBJECT
+        =====================================
+        */
+
+        const sub =
+        subjects[0];
+
+        /*
+        =====================================
+        SUBJECT NAME
+        =====================================
+        */
+
+        document.getElementById(
+            "subjectBox"
+        ).innerText =
+        sub.subject;
+
+        /*
+        =====================================
+        FETCH JSON
+        =====================================
+        */
+
+        const res =
         await fetch(
 
 `https://raw.githubusercontent.com/flexisystems2000/BECE-exams/main/${sub.file}`
 
         );
 
+        /*
+        =====================================
+        FETCH FAILED
+        =====================================
+        */
+
+        if(!res.ok){
+
+            throw new Error(
+                "Unable to fetch questions"
+            );
+        }
+
+        /*
+        =====================================
+        JSON DATA
+        =====================================
+        */
+
         const data =
         await res.json();
 
         /*
-        =================================
-        SUPPORT DIFFERENT JSON STRUCTURES
-        =================================
+        =====================================
+        GET ACTUAL ARRAY
+        =====================================
         */
 
-        if(Array.isArray(data)){
+        const firstKey =
+        Object.keys(data)[0];
 
-            questions = data;
+        questions =
+        data[firstKey] || [];
 
-        }else if(data.questions){
+        /*
+        =====================================
+        EMPTY QUESTIONS
+        =====================================
+        */
 
-            questions =
-            data.questions;
+        if(
+            !Array.isArray(questions) ||
+            !questions.length
+        ){
 
-        }else{
+            document.getElementById(
+                "qText"
+            ).innerText =
 
-            questions = [];
+            "No questions found.";
+
+            return;
         }
 
         /*
-        =================================
+        =====================================
         RANDOMIZE
-        =================================
+        =====================================
         */
 
         questions.sort(() =>
             Math.random() - 0.5
         );
+
+        /*
+        =====================================
+        START RENDER
+        =====================================
+        */
 
         render();
 
@@ -1085,6 +1137,8 @@ async function loadData(){
         "Error loading questions.";
     }
 }
+
+
 
 /*
 =========================================
