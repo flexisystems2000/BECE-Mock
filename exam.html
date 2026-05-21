@@ -1108,11 +1108,23 @@ function render(){
     const q =
     questions[cur];
 
+    /*
+    =====================================
+    QUESTION TEXT
+    =====================================
+    */
+
     document.getElementById(
         "qText"
     ).innerText =
 
-    `${cur + 1}. ${q.question}`;
+    `${cur + 1}. ${q.q}`;
+
+    /*
+    =====================================
+    OPTIONS CONTAINER
+    =====================================
+    */
 
     const cont =
 
@@ -1124,67 +1136,73 @@ function render(){
 
     /*
     =====================================
-    FIX DIFFERENT OPTION STRUCTURES
+    OPTIONS ARRAY
     =====================================
     */
 
-    const options = {
+    const labels =
+    ["A","B","C","D"];
 
-        A:
-        q.optionA || q.A || "",
+    if(Array.isArray(q.o)){
 
-        B:
-        q.optionB || q.B || "",
+        q.o.forEach((option,index)=>{
 
-        C:
-        q.optionC || q.C || "",
-
-        D:
-        q.optionD || q.D || ""
-    };
-
-    Object.keys(options)
-    .forEach(k => {
-
-        const btn =
-        document.createElement(
-            "button"
-        );
-
-        btn.className =
-        "optionBtn";
-
-        btn.innerText =
-
-        `${k}. ${options[k]}`;
-
-        btn.onclick = () => {
-
-            answers[cur] = k;
-
-            localStorage.setItem(
-
-                "examAnswers",
-
-                JSON.stringify(
-                    answers
-                )
+            const btn =
+            document.createElement(
+                "button"
             );
 
-            render();
-        };
+            btn.className =
+            "optionBtn";
 
-        if(
-            answers[cur] === k
-        ){
+            btn.innerText =
 
-            btn.classList.add(
-                "selected"
-            );
-        }
+            `${labels[index]}. ${option}`;
 
-        cont.appendChild(btn);
-    });
+            btn.onclick = () => {
+
+                answers[cur] = index;
+
+                localStorage.setItem(
+
+                    "examAnswers",
+
+                    JSON.stringify(
+                        answers
+                    )
+                );
+
+                render();
+            };
+
+            /*
+            =================================
+            SELECTED STATE
+            =================================
+            */
+
+            if(
+                answers[cur] === index
+            ){
+
+                btn.classList.add(
+                    "selected"
+                );
+            }
+
+            cont.appendChild(btn);
+        });
+
+    }else{
+
+        document.getElementById(
+            "qText"
+        ).innerText =
+
+        "Invalid question format.";
+
+        return;
+    }
 
     /*
     =====================================
@@ -1210,6 +1228,12 @@ function render(){
         t.className =
         "tab-btn";
 
+        /*
+        =================================
+        CURRENT QUESTION
+        =================================
+        */
+
         if(i === cur){
 
             t.classList.add(
@@ -1217,7 +1241,15 @@ function render(){
             );
         }
 
-        if(answers[i]){
+        /*
+        =================================
+        ANSWERED STATE
+        =================================
+        */
+
+        if(
+            answers[i] !== undefined
+        ){
 
             t.classList.add(
                 "answered"
