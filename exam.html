@@ -1580,22 +1580,23 @@ async function submitExam(isForced){
 
         questions.forEach((q,index)=>{
 
-            const correctAnswer =
+    const correctAnswer =
 
-            q.answer ||
-            q.correctAnswer ||
-            "";
+    q.a ??
+    q.answer ??
+    q.correctAnswer ??
+    "";
 
-            if(
+    if(
 
-                answers[index] ===
-                correctAnswer
+        answers[index] ===
+        correctAnswer
 
-            ){
+    ){
 
-                score++;
-            }
-        });
+        score++;
+    }
+});
 
         const percentage =
 
